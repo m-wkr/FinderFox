@@ -3,9 +3,13 @@ import subprocess
 import logging
 import os
 import threading
+import sys
 from ds_store import DSStore
 
 from font import bold, underline
+
+sys.path.insert(0,"..")
+from scriptWriter import writeBashContents
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -54,9 +58,8 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
             if file.is_link and file.href:
                 logger.info("Creating symlink for %s to %s", file.title, file.href)
                 file.title = underline(file.title)
-                # TODO: Handle URLs
-                os.symlink(file.href, os.path.join(tmpdirname, site_name, file.title))
                 file_path = os.path.join(tmpdirname, site_name, file.title)
+                writeBashContents.createBashFile(file_path)
             else:
                 if file.tag == "h1":
                     file.title = bold(file.title)
