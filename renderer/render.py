@@ -18,13 +18,14 @@ class FinderFile:
         is_link: bool = False,
         href: str | None = None,
         tag: str | None = None,
+        icon_path: str | None = None,
     ):
         self.title: str = title
         self.position: tuple[int, int] = position
         self.is_link: bool = is_link
         self.href: str | None = href
         self.tag: str | None = tag
-
+        self.icon_path: str | None = icon_path
 
 def finder_render(site_name="Test Site", files: list[FinderFile] = []):
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -32,17 +33,23 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
         os.mkdir(os.path.join(tmpdirname, site_name))
 
         for file in files:
+            file.title = ""
             if file.is_link and file.href:
                 logger.info("Creating symlink for %s to %s", file.title, file.href)
                 file.title = underline(file.title)
                 # TODO: Handle URLs
                 os.symlink(file.href, os.path.join(tmpdirname, site_name, file.title))
+                file_path = os.path.join(tmpdirname, site_name, file.title)
             else:
                 if file.tag == "h1":
                     file.title = bold(file.title)
                 file_path = os.path.join(tmpdirname, site_name, file.title)
                 with open(file_path, "w") as f:
                     f.write("")
+            if file.icon_path:
+                subprocess.run([
+                    "fileicon", "set", file_path, file.icon_path
+                ])
 
         logger.info("Created %d files in %s", len(files), tmpdirname)
 
