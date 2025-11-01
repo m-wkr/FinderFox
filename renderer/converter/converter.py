@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import sys
+import textwrap
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -53,12 +54,12 @@ class CoordinateSystem:
             browser.close()
         return results
     
-    def coord_all(self) -> dict[str, FinderFile]:
+    def coord_all(self, slice_size: int = 20) -> list[FinderFile]:
         elems = [el for el in self.soup.find_all(True)]
         selectors = [el.name for el in elems]
         bbox_results = self.__get_element_bboxes_playwright(selectors)
         
-        result: dict[str, FinderFile] = {}
+        result: list[FinderFile] = []
         skip_tags = {"html", "head", "meta", "script", "style"}
         for el, sel, rect in zip(elems, selectors, bbox_results):
             if not rect or el.name.lower() in skip_tags:
@@ -70,16 +71,16 @@ class CoordinateSystem:
                 href = str(href)
             else:
                 href = None
+            position = (rect["x"] + int(rect["width"] / 2), rect["y"] + int(rect["height"] / 2))
             
-            position = (rect["x"], rect["y"])
-            
-            result[sel] = FinderFile(title=title, position=position, is_link=is_link, href=href, tag=el.name.lower())
+            for t in textwrap.wrap(title, 20):
+                result.append(FinderFile(title=t, position=position, is_link=is_link, href=href, tag=el.name.lower()))
             
         return result
         
 
 def main():
-    d = CoordinateSystem("https://www.educative.io/answers/how-to-use-gettext-in-beautiful-soup", 1000, 1000) # ds.get_width, ds.get_height
+    d = CoordinateSystem("https://google.com", 1000, 1000) # ds.get_width, ds.get_height
     coords = d.coord_all()
     pass
 
