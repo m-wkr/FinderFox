@@ -1,0 +1,228 @@
+{
+    "tag": "html",
+    "attrs": {
+        "lang": "en"
+    },
+    "children": [
+        {
+            "tag": "head",
+            "children": [
+                {
+                    "tag": "meta",
+                    "attrs": {
+                        "charset": "utf-8"
+                    }
+                },
+                {
+                    "tag": "meta",
+                    "attrs": {
+                        "name": "viewport",
+                        "content": "width=device-width,initial-scale=1"
+                    }
+                },
+                {
+                    "tag": "title",
+                    "text": "Sample Page"
+                },
+                {
+                    "tag": "style",
+                    "text": ":root { font-family: system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif; } body { margin: 0; padding: 24px; background:#f5f7fb; color:#111; } header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; } nav ul { list-style:none; margin:0; padding:0; display:flex; gap:12px; } .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; } .card { background:#fff; border:1px solid #e3e7ef; padding:12px; border-radius:6px; box-shadow:0 1px 2px rgba(16,24,40,0.04); } footer { margin-top:20px; font-size:0.9em; color:#556; } code { background:#eef2ff; padding:2px 6px; border-radius:4px; }"
+                }
+            ]
+        },
+        {
+            "tag": "body",
+            "children": [
+                {
+                    "tag": "header",
+                    "children": [
+                        {
+                            "tag": "div",
+                            "children": [
+                                {
+                                    "tag": "h1",
+                                    "text": "CamHack — Demo",
+                                    "attrs": {
+                                        "style": "margin:0;font-size:1.25rem"
+                                    }
+                                },
+                                {
+                                    "tag": "div",
+                                    "text": "Sample UI for testing",
+                                    "attrs": {
+                                        "style": "font-size:0.9rem;color:#556"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "nav",
+                            "attrs": {
+                                "aria-label": "main"
+                            },
+                            "children": [
+                                {
+                                    "tag": "ul",
+                                    "children": [
+                                        {
+                                            "tag": "li",
+                                            "children": [
+                                                {
+                                                    "tag": "a",
+                                                    "attrs": {
+                                                        "href": "#",
+                                                        "aria-current": "page"
+                                                    },
+                                                    "text": "Home"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "tag": "li",
+                                            "children": [
+                                                {
+                                                    "tag": "a",
+                                                    "attrs": {
+                                                        "href": "#"
+                                                    },
+                                                    "text": "Docs"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "tag": "li",
+                                            "children": [
+                                                {
+                                                    "tag": "a",
+                                                    "attrs": {
+                                                        "href": "#"
+                                                    },
+                                                    "text": "Samples"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "tag": "main",
+                    "children": [
+                        {
+                            "tag": "section",
+                            "attrs": {
+                                "class": "grid",
+                                "aria-label": "samples"
+                            },
+                            "children": [
+                                {
+                                    "tag": "article",
+                                    "attrs": {
+                                        "class": "card"
+                                    },
+                                    "children": [
+                                        {
+                                            "tag": "h2",
+                                            "text": "Item A",
+                                            "attrs": {
+                                                "style": "margin-top:0;font-size:1rem"
+                                            }
+                                        },
+                                        {
+                                            "tag": "p",
+                                            "text": "Example content, coordinates or parsed data preview.",
+                                            "attrs": {
+                                                "style": "margin:6px 0 0 0"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "tag": "article",
+                                    "attrs": {
+                                        "class": "card"
+                                    },
+                                    "children": [
+                                        {
+                                            "tag": "h2",
+                                            "text": "Item B",
+                                            "attrs": {
+                                                "style": "margin-top:0;font-size:1rem"
+                                            }
+                                        },
+                                        {
+                                            "tag": "p",
+                                            "text": "Another row. Strings of equal length can be shown as <code>abcd1234</code>.",
+                                            "attrs": {
+                                                "style": "margin:6px 0 0 0"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "tag": "article",
+                                    "attrs": {
+                                        "class": "card"
+                                    },
+                                    "children": [
+                                        {
+                                            "tag": "h2",
+                                            "text": "Item C",
+                                            "attrs": {
+                                                "style": "margin-top:0;font-size:1rem"
+                                            }
+                                        },
+                                        {
+                                            "tag": "p",
+                                            "text": "Use this to visualize parsed JSON or sample DOM nodes.",
+                                            "attrs": {
+                                                "style": "margin:6px 0 0 0"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "tag": "article",
+                                    "attrs": {
+                                        "class": "card"
+                                    },
+                                    "children": [
+                                        {
+                                            "tag": "h2",
+                                            "text": "Item D",
+                                            "attrs": {
+                                                "style": "margin-top:0;font-size:1rem"
+                                            }
+                                        },
+                                        {
+                                            "tag": "p",
+                                            "text": "Placeholder for images or coordinate-based rendering.",
+                                            "attrs": {
+                                                "style": "margin:6px 0 0 0"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "tag": "footer",
+                    "children": [
+                        {
+                            "tag": "p",
+                            "text": "© 2025 Example — generated sample HTML for testing."
+                        }
+                    ]
+                },
+                {
+                    "tag": "script",
+                    "text": "document.querySelectorAll('.card h2').forEach(h => console.log('Card:', h.textContent));"
+                }
+            ]
+        }
+    ]
+}
