@@ -1,5 +1,3 @@
-from playwright.sync_api import sync_playwright
-
 from render import FinderFile
 
 import logging

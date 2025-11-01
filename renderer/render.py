@@ -41,22 +41,25 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
     word_use_count = {}
 
     files.sort(key=lambda finder_file: finder_file.position[1])
+    
     if len(files) > 190:
         y_threshold = files[189].position[1]
         files = [finder_file for finder_file in files if finder_file.position[1] <= y_threshold]
-        coord_min, coord_max = 0, 5000
-        valid_files = []
-        for finder_file in files:
-            x, y = finder_file.position
-            if x < coord_min or y < coord_min or x > coord_max or y > coord_max:
-                logger.warning(
-                    "Skipping %s due to out-of-range position %s",
-                    finder_file.title,
-                    finder_file.position,
-                )
-                continue
-            valid_files.append(finder_file)
-        files = valid_files
+    
+    coord_min, coord_max = 0, 5000
+    valid_files = []
+
+    for finder_file in files:
+        x, y = finder_file.position
+        if x < coord_min or y < coord_min or x > coord_max or y > coord_max:
+            logger.warning(
+                "Skipping %s due to out-of-range position %s",
+                finder_file.title,
+                finder_file.position,
+            )
+            continue
+        valid_files.append(finder_file)
+    files = valid_files
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         logger.info("Created temporary directory %s", tmpdirname)
