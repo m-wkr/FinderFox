@@ -33,7 +33,16 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
         os.mkdir(os.path.join(tmpdirname, site_name))
 
         for file in files:
-            file.title = ""
+                
+            file.title = file.title.replace("/", "-").replace("\0", "").strip()
+
+            if file.title == "":
+                continue
+            
+            if len(file.title) > 32:
+                logger.warning("Filename %s is too long, truncating to 32 characters", file.title)
+                file.title = file.title[:32]
+            
             if file.is_link and file.href:
                 logger.info("Creating symlink for %s to %s", file.title, file.href)
                 file.title = underline(file.title)
@@ -51,11 +60,12 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
                     "fileicon", "set", file_path, file.icon_path
                 ])
 
-        logger.info("Created %d files in %s", len(files), tmpdirname)
-
         with DSStore.open(os.path.join(tmpdirname, site_name, ".DS_Store"), "w+") as d:
             for i, file in enumerate(files):
-                filename = file.title
+                if file.title == "":
+                    continue
+                logger.info("Setting icon position for %s to %s", file.title, file.position)
+                filename = file.title[:32]
                 d[filename]["Iloc"] = file.position
             logger.info("Set icon positions in .DS_Store")
 
