@@ -3,6 +3,7 @@ from playwright.sync_api import sync_playwright
 
 from domreader.domreader import dom_read
 from render import finder_render
+from renderer.URLsanitiser import returnURL
 from url_image_converter import URLImageConverter
 
 import logging
@@ -40,7 +41,7 @@ def main():
         finder_render(title, coords)
         return
       
-    converter = URLImageConverter(args.url, icon_limit=300)
+    converter = URLImageConverter(returnURL(args.url), icon_limit=300)
     image_tokens = converter.get_image_display()
     link_tokens = converter.get_link_display()
     # cover_tokens = converter.get_cover_display()
