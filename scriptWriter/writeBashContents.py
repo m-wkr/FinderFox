@@ -1,14 +1,14 @@
 import os
+script_path = os.path.dirname(os.path.realpath(__file__))
 
-def writeToBashFile():
-  return """
+def writeToBashFile(url):
+  return f"""
   #!/bin/bash
   
-  python3 "../renderer/main.py
-  """
+  python3 \"{script_path}/../renderer/main.py\" \"{url}\"\n"""
 
-def createBashFile(filePath):
+def createBashFile(filePath, url):
   with open(filePath, "w") as f:
-    f.write(writeToBashFile())
+    f.write(writeToBashFile(url))
 
   os.chmod(filePath,0o755)

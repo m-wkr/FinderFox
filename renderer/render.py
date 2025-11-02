@@ -90,7 +90,7 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
                 logger.info("Creating symlink for %s to %s", file.title, file.href)
                 file.title = underline(file.title)
                 file_path = os.path.join(tmpdirname, site_name, file.title)
-                writeBashContents.createBashFile(file_path)
+                writeBashContents.createBashFile(file_path,file.href)
             else:
                 if file.tag == "h1":
                     file.title = bold(file.title)

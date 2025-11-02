@@ -1,3 +1,4 @@
+import os
 import sys
 import math
 from pathlib import Path
@@ -89,6 +90,10 @@ class URLImageConverter:
         ix, iy = self.__icon_size
         for x, y in positions:
             icon_path = f"renderer/url_icon/{self.__icon_limit}.png"
+            if not os.path.exists("renderer"):
+                os.mkdir("renderer")
+            if not os.path.exists("renderer/url_icon"):
+                os.mkdir("renderer/url_icon")
             self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
             
             if ref := bbpos_to_ref.get((x,y)):
