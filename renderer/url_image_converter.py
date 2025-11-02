@@ -1,7 +1,6 @@
 import sys
 import math
 from pathlib import Path
-from collections import defaultdict
 project_root = Path(__file__).resolve().parents[1]
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
@@ -43,7 +42,7 @@ class URLImageConverter:
             page.wait_for_load_state("networkidle")
             img_bytes: bytes = page.screenshot(full_page=True)
             browser.close()
-        img = Image.open(BytesIO(img_bytes)).convert('RGB')
+        img = Image.open(BytesIO(img_bytes)).convert('RGBA')
         return img
     
     def __get_state_history_ref(self):
@@ -65,16 +64,13 @@ class URLImageConverter:
             coords, self.__ref_bboxes, self.title = dom_read(playwright, url)
         tokens = list(filter(lambda x: x.is_link, coords))
         tokens.extend(self.__get_state_history_ref())
+        self.__ref_bboxes = {k: v for k, v in self.__ref_bboxes.items() if k in tokens}
         return tokens
     
     def __tiling(self) -> list[tuple[int, int]]:
         ix, iy = self.__icon_size
         vx, vy = self.__img.size
-        positions = [(ix*x, iy*y)for x in range(math.floor(vx/ix)) for y in range(math.floor(vy//iy))]
-        if not (vx/ix).is_integer():
-            positions.extend([(vx-ix, iy*y) for y in range(math.floor(vy/iy))])
-        if not (vy/iy).is_integer():
-            positions.extend([(ix*x, vy-iy) for x in range(math.floor(vx/ix))])
+        positions = [(ix*x, iy*y) for x in range(math.ceil(vx/ix)) for y in range(math.ceil(vy//iy))]
         
         for (x,y,w,h) in self.__ref_bboxes.values():
             x = int(x)
