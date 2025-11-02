@@ -2,7 +2,6 @@ import tempfile
 import subprocess
 import logging
 import os
-import threading
 import sys
 from ds_store import DSStore
 
@@ -56,7 +55,7 @@ def finder_render(
             if finder_file.position[1] <= y_threshold
         ]
 
-    coord_min, coord_max = 0, 10000
+    coord_min, coord_max = 0, 100000
     valid_files = []
 
     for finder_file in files:
@@ -102,7 +101,7 @@ def finder_render(
                 file.title += "\u200b" * (word_use_count[file.title.lower()] - 1)
 
             if file.is_link and file.href:
-                logger.info("Creating symlink for %s to %s", file.title, file.href)
+                logger.info("Creating Bash script for %s to %s", file.title, file.href)
                 file.title = underline(file.title)
                 file_path = os.path.join(tmpdirname, site_name, file.title)
                 writeBashContents.createBashFile(file_path, file.href, text_mode)
@@ -112,7 +111,10 @@ def finder_render(
                 file_path = os.path.join(tmpdirname, site_name, file.title)
                 with open(file_path, "w") as f:
                     f.write("")
+            if file.icon_path:
+                set_icon_process(file_path, file.icon_path) #changed
 
+            """
             threads = []
 
             if file.icon_path:
@@ -125,7 +127,7 @@ def finder_render(
                 t.start()
 
             for t in threads:
-                t.join()
+                t.join()"""
 
         with DSStore.open(os.path.join(tmpdirname, site_name, ".DS_Store"), "w+") as d:
             for i, file in enumerate(files):

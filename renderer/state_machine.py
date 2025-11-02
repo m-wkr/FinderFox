@@ -29,7 +29,7 @@ if __name__ == "__main__":
         obs.join()"""
 
 class State:
-    def __init__(self, filename:str="state.json", url:str="https://camhack.org") -> None:
+    def __init__(self, filename:str, url:str="https://camhack.org") -> None:
         with open(filename, "r") as state_file:
             state = json.loads(state_file.read())
         self.history: list[str] = state["history"] if "history" in state else []
