@@ -40,8 +40,8 @@ class URLImageConverter:
         with sync_playwright() as p:
             browser = p.firefox.launch()
             page = browser.new_page()
-            page.goto(url)
             browser.new_context().set_extra_http_headers(self.__header)
+            page.goto(url)
             page.wait_for_load_state("networkidle")
             img_bytes: bytes = page.screenshot(full_page=True)
             browser.close()
@@ -172,5 +172,5 @@ if __name__ == "__main__":
     # You can input an different icon_size (int, int) default is 512, 512
     
     converter = URLImageConverter("https://camhack.org/")
-    tokens, title = converter.get_image_display(), converter.title
+    tokens, title = converter.get_link_display(), converter.title
     pass

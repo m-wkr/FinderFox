@@ -38,7 +38,7 @@ def main():
         return
       
     converter = URLImageConverter(args.url, icon_limit=230)
-    tokens, title = converter.get_image_display() + converter.get_link_display(), converter.title #+ converter.get_cover_display(), converter.title
+    tokens, title = converter.get_image_display() + converter.get_link_display(), converter.title
     finder_render(title, tokens, icon_size=512)
 
 if __name__ == "__main__":
