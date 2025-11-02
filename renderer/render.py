@@ -6,7 +6,7 @@ import threading
 import sys
 from ds_store import DSStore
 
-from renderer.font import bold, underline
+from font import bold, underline
 from pathlib import Path
 
 project_root = Path(__file__).resolve().parents[1]
@@ -45,11 +45,11 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
 
     files.sort(key=lambda finder_file: finder_file.position[1])
     
-    if len(files) > 190:
-        y_threshold = files[189].position[1]
+    if len(files) > 200:
+        y_threshold = files[199].position[1]
         files = [finder_file for finder_file in files if finder_file.position[1] <= y_threshold]
     
-    coord_min, coord_max = 0, 5000
+    coord_min, coord_max = 0, 10000
     valid_files = []
 
     for finder_file in files:
@@ -139,7 +139,7 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
                 "scrollPositionX": 0,
                 "arrangeBy": "none",
                 "labelOnBottom": False,
-                "iconSize": 16,
+                "iconSize": 512,
                 "textSize": 16,
                 "showIconPreview": False,
             }

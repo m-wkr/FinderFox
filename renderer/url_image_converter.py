@@ -1,3 +1,4 @@
+import os
 import sys
 import math
 from pathlib import Path
@@ -74,16 +75,16 @@ class URLImageConverter:
         if not (vx/ix).is_integer():
             positions.extend([(vx-ix, iy*y) for y in range(math.floor(vy/iy))])
         if not (vy/iy).is_integer():
-            positions.extend([(ix*x, vy-iy) for x in range(math.floor(vx/ix))])
+            positions.extend([(ix*x, vy-iy) for x in range(math.floor(vx/ix) + 1)])
         
-        for (x,y,w,h) in self.__ref_bboxes.values():
-            x = int(x)
-            y = int(y)
-            w = int(w)
-            h = int(h)
-            positions.append((x,y))
-            positions.append((x+w,y))
-            positions.append((x,y+h)) 
+        # for (x,y,w,h) in self.__ref_bboxes.values():
+        #     x = int(x)
+        #     y = int(y)
+        #     w = int(w)
+        #     h = int(h)
+        #     positions.append((x,y))
+        #     positions.append((x+w,y))
+        #     positions.append((x,y+h)) 
         return positions
     
     def get_image_display(self) -> list[FinderFile]:
@@ -93,6 +94,7 @@ class URLImageConverter:
         ix, iy = self.__icon_size
         for x, y in positions:
             icon_path = f"url_icon/{self.__icon_limit}.png"
+            os.makedirs(os.path.dirname(icon_path), exist_ok=True)
             self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
             
             if ref := bbpos_to_ref.get((x,y)):
