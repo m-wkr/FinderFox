@@ -19,6 +19,9 @@ def main():
     parser.add_argument(
         "-t", "--text", action="store_true", help="Use text-based rendering."
     )
+    parser.add_argument(
+        "--no-links", action="store_true", help="Disable link rendering."
+    )
     args = parser.parse_args()
 
     if not args.plot and not args.url:
@@ -43,7 +46,10 @@ def main():
       
     converter = URLImageConverter(returnURL(args.url), icon_limit=300)
     image_tokens = converter.get_image_display()
-    link_tokens = converter.get_link_display()
+    if args.no_links:
+        link_tokens = []
+    else:
+        link_tokens = converter.get_link_display()
     # cover_tokens = converter.get_cover_display()
     cover_tokens = []
 
