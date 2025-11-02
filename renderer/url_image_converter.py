@@ -76,7 +76,7 @@ class URLImageConverter:
             y = int(y)
             w = int(w)
             h = int(h)
-            if h+y+200 > self.__img.size[1]:
+            if h+y+self.__icon_size[1] > self.__img.size[1]:
                 continue
             positions.append((x,y))
         return positions
