@@ -1,8 +1,16 @@
+import sys
+import math
+from pathlib import Path
+from collections import defaultdict
+project_root = Path(__file__).resolve().parents[1]
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 from renderer.render import FinderFile
 from playwright.sync_api import sync_playwright
 from PIL import Image
 from io import BytesIO
 from renderer.domreader.domreader import dom_read
+from renderer.state_machine import State
 
 
 class URLImageConverter:
@@ -15,8 +23,16 @@ class URLImageConverter:
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
         }
+        self.__state: State = State(url)
         self.__img: Image.Image = self.__get_img(url)
-        self.__ref: dict[tuple[int, int], FinderFile] = self.__get_ref(url)
+        ### get_ref has the side effect of populating the shift command dict
+        self.__ref_bboxes: dict[FinderFile, tuple[int,int,int,int]] = {}
+        self.__ref: list[FinderFile] = self.__get_ref(url)
+    
+    def set_state(self, url):
+        self.__state = State(url)
+        self.__img: Image.Image = self.__get_img(url)
+        self.__ref: list[FinderFile] = self.__get_ref(url)
             
     def __get_img(self, url) -> Image.Image:
         with sync_playwright() as p:
@@ -30,49 +46,73 @@ class URLImageConverter:
         img = Image.open(BytesIO(img_bytes)).convert('RGB')
         return img
     
+    def __get_state_history_ref(self):
+        token = []
+        ix, iy = self.__icon_size
+        vx, vy = self.__img.size
+        
+        if self.__state.left != []:
+            token.append(FinderFile(title="[Placeholder]", position=(0,0), is_link=True, href=self.__state.left[-1]))
+        if self.__state.right != []:
+            token.append(FinderFile(title="[Placeholder]", position=(vx-ix,vy-iy), is_link=True, href=self.__state.right[-1]))
+        if self.__state.history != []:
+            x, y = (vx // 2, vy // 2)
+            token.append(FinderFile(title="[Placeholder]", position=(x,y), is_link=True, href=self.__state.history[-1]))
+        return token
+    
     def __get_ref(self, url):
         with sync_playwright() as playwright:
-            coords, self.title = dom_read(playwright, url)
-        coords = list(filter(lambda x: x.is_link, coords))
-        result = {}
-        for coord in coords:
-            clamp_multiple = lambda x, base: base * round(x/base)
-            key = (clamp_multiple(coord.position[0], self.__icon_size[0]), clamp_multiple(coord.position[1], self.__icon_size[1]))
-            result[key] = coord
-        return result
-        
-            
-    def get_image_display(self, icon_size:tuple[int,int]=(512,512)) -> list[FinderFile]:
-        result = []
-        ix, iy = icon_size
+            coords, self.__ref_bboxes, self.title = dom_read(playwright, url)
+        tokens = list(filter(lambda x: x.is_link, coords))
+        tokens.extend(self.__get_state_history_ref())
+        return tokens
+    
+    def __tiling(self) -> list[tuple[int, int]]:
+        ix, iy = self.__icon_size
         vx, vy = self.__img.size
-        positions = [[(ix*x, iy*y)for x in range(vx//ix)] for y in range(vy//iy)]
+        positions = [(ix*x, iy*y)for x in range(math.floor(vx/ix)) for y in range(math.floor(vy//iy))]
         if not (vx/ix).is_integer():
-            for row in positions:
-                row.append((vx-ix, row[0][1]))
+            positions.extend([(vx-ix, iy*y) for y in range(math.floor(vy/iy))])
         if not (vy/iy).is_integer():
-            positions.append(list(zip([x for (x, _) in positions[0]], [vy-iy for _ in range(len(positions[0]))])))
-        count = 0
-        for row in positions:
-            for x, y in row:
-                icon_path = f"renderer/url_icon/{count}.png"
-                self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
-                if value := self.__ref.get((x,y)):
-                    href = value.href
-                    is_link = value.is_link
-                else:
-                    href = None
-                    is_link = False
-                result.append(FinderFile(
-                    title="",
-                    position=(x,y),
-                    href=href,
-                    is_link=is_link,
-                    icon_path=icon_path
-                ))
-                count += 1
-                if count >= self.__icon_limit:
-                    return result
+            positions.extend([(ix*x, vy-iy) for x in range(math.floor(vx/ix))])
+        
+        for (x,y,w,h) in self.__ref_bboxes.values():
+            x = int(x)
+            y = int(y)
+            w = int(w)
+            h = int(h)
+            positions.append((x,y))
+            positions.append((x+w,y))
+            positions.append((x,y+h)) 
+        return positions
+    
+    def get_image_display(self) -> list[FinderFile]:
+        bbpos_to_ref = {(int(bbox[0]), int(bbox[1])): ref for ref, bbox in self.__ref_bboxes.items()}
+        positions = self.__tiling()
+        result = []
+        ix, iy = self.__icon_size
+        for x, y in positions:
+            icon_path = f"renderer/url_icon/{self.__icon_limit}.png"
+            self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
+            
+            if ref := bbpos_to_ref.get((x,y)):
+                is_link = True
+                href = ref.href
+            else:
+                is_link = False
+                href = None
+    
+            result.append(FinderFile(
+                title="[Image]",
+                position=(x,y),
+                is_link=is_link,
+                href=href,
+                icon_path=icon_path
+            ))
+            
+            self.__icon_limit -= 1
+            if 0 >= self.__icon_limit:
+                return result
         return result
     
     
@@ -82,6 +122,6 @@ if __name__ == "__main__":
     # Returns a FinderFile list, overwrite url_icon directory
     # You can input an different icon_size (int, int) default is 512, 512
     
-    converter = URLImageConverter("https://en.wikipedia.org/wiki/Railtrack")
+    converter = URLImageConverter("https://camhack.org/")
     tokens, title = converter.get_image_display(), converter.title
     pass
