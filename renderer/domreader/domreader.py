@@ -137,7 +137,7 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                         brokenIms=imageBreak(output_path,{'x':16,'y':16},{'x':box['x'],'y':box['y']})
                         for brokenIm in brokenIms:
                             brokenOutpath=image_dir / "brimage"+str(time.time())+".png"
-                            imageio.imwrite(brokenOutpath,brokenIm['im'])
+                            imageio.v2.imwrite(brokenOutpath,brokenIm['im'])
                             all_text_data.append(
                                 {
                                     "text": "[Image]",
