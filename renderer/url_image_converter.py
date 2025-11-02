@@ -72,8 +72,8 @@ class URLImageConverter:
     def __link_tiling(self) -> list[tuple[int, int]]:
         positions = []
         for (x,y,w,h) in self.__ref_bboxes.values():
-            x = round(int(x), 2)
-            y = round(int(y), 2)
+            x = int(x)
+            y = int(y)
             w = int(w)
             h = int(h)
             positions.append((x,y))
@@ -82,8 +82,8 @@ class URLImageConverter:
     def __link_cover_tiling(self) -> list[tuple[int, int]]:
         positions = []
         for (x,y,w,h) in self.__ref_bboxes.values():
-            x = round(int(x), 2)
-            y = round(int(y), 2)
+            x = int(x)
+            y = int(y)
             w = int(w)
             h = int(h)
             positions.append((x+w,y))
@@ -147,7 +147,18 @@ class URLImageConverter:
     
     def get_link_display(self) -> list[FinderFile]:
         positions = self.__link_tiling()
-        return self.__set_image_display(positions)
+        ff = self.__set_image_display(positions)
+        seen_x = []
+        seen_y = []
+        result = []
+        for f in ff:
+            x, y = f.position
+            seen_x.append(x)
+            seen_y.append(y)
+            if x in seen_x or y in seen_y:
+                continue
+            result.append(f)
+        return result
     
     def get_cover_display(self) -> list[FinderFile]:
         positions = self.__link_cover_tiling()
