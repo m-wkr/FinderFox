@@ -57,7 +57,7 @@ class URLImageConverter:
     
     def __get_ref(self, url):
         with sync_playwright() as playwright:
-            coords, self.__ref_bboxes, self.title = dom_read(playwright, url)
+            coords, self.__ref_bboxes, self.title = dom_read(playwright, url, no_break=True)
         tokens = list(filter(lambda x: x.is_link, coords))
         tokens.extend(self.__get_state_history_ref())
         self.__ref_bboxes = {k: v for k, v in self.__ref_bboxes.items() if k in tokens}

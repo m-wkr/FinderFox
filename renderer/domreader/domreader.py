@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, tuple[int,int,int,int]], str]:
+def dom_read(playwright, url: str, no_break: bool = False) -> tuple[list[FinderFile], dict[FinderFile, tuple[int,int,int,int]], str]:
     ret = []
     browser = playwright.chromium.launch(headless=True)
     page = browser.new_page(viewport={"width": 1200, "height": 600})
@@ -99,7 +99,7 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                                 "href": resolved_href,
                             }
                         )
-            elif element.evaluate("el => el.tagName.toLowerCase() === 'img'"):
+            elif not no_break and element.evaluate("el => el.tagName.toLowerCase() === 'img'"):
                 # Handle images
                 src = element.get_attribute("src")
                 output_path = None
@@ -136,7 +136,7 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                     if box:
                         brokenIms=imageBreak(output_path,{'x':16,'y':16},{'x':box['x'],'y':box['y']})
                         for brokenIm in brokenIms:
-                            brokenOutpath=image_dir / "brimage"+str(time.time())+".png"
+                            brokenOutpath=str(image_dir / "brimage")+str(time.time())+".png"
                             imageio.v2.imwrite(brokenOutpath,brokenIm['im'])
                             all_text_data.append(
                                 {
