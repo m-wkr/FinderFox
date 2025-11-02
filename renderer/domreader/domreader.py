@@ -12,10 +12,19 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def dom_read(playwright, url: str, no_break: bool = False) -> tuple[list[FinderFile], dict[FinderFile, tuple[int,int,int,int]], str]:
+def dom_read(
+    playwright, url: str, no_break: bool = False
+) -> tuple[list[FinderFile], dict[FinderFile, tuple[int, int, int, int]], str]:
     ret = []
     browser = playwright.chromium.launch(headless=True)
     page = browser.new_page(viewport={"width": 1200, "height": 600})
+    browser.new_context().set_extra_http_headers(
+        {
+            "User-Agent": "CamHack/1.0 (mailto:your-email@example.com) Python/3.x requests",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+    )
     page.goto(url)
 
     page.wait_for_load_state("networkidle")
@@ -119,7 +128,9 @@ def dom_read(playwright, url: str, no_break: bool = False) -> tuple[list[FinderF
                                 file_suffix = f".{mime.split('/', 1)[1]}"
                         else:
                             resolved_src = element.evaluate("node => node.src") or src
-                            response = page.context.request.get(resolved_src, timeout=5000)
+                            response = page.context.request.get(
+                                resolved_src, timeout=5000
+                            )
                             if response.ok:
                                 file_bytes = response.body()
                                 path_suffix = Path(urlparse(resolved_src).path).suffix
@@ -136,31 +147,45 @@ def dom_read(playwright, url: str, no_break: bool = False) -> tuple[list[FinderF
                     if box:
                         if no_break:
                             all_text_data.append(
-                            {
-                                "text": "[Image]",
-                                "x": box["x"],
-                                "y": box["y"],
-                                "width": box["width"],
-                                "height": box["height"],
-                                "href": None,
-                                "icon_path": str(output_path) if output_path else None,
-                            }
-                        )
+                                {
+                                    "text": "[Image]",
+                                    "x": box["x"],
+                                    "y": box["y"],
+                                    "width": box["width"],
+                                    "height": box["height"],
+                                    "href": None,
+                                    "icon_path": (
+                                        str(output_path) if output_path else None
+                                    ),
+                                }
+                            )
                             logger.info(f"Found image in element: {src[:10]}...")
                         else:
-                            brokenIms=imageBreak(output_path,{'x':16,'y':16},{'x':box['x'],'y':box['y']})
+                            brokenIms = imageBreak(
+                                output_path,
+                                {"x": 16, "y": 16},
+                                {"x": box["x"], "y": box["y"]},
+                            )
                             for brokenIm in brokenIms:
-                                brokenOutpath=str(image_dir / "brimage")+str(time.time())+".png"
-                                imageio.v2.imwrite(brokenOutpath,brokenIm['im'])
+                                brokenOutpath = (
+                                    str(image_dir / "brimage")
+                                    + str(time.time())
+                                    + ".png"
+                                )
+                                imageio.v2.imwrite(brokenOutpath, brokenIm["im"])
                                 all_text_data.append(
                                     {
                                         "text": "[Image]",
-                                        "x": brokenIm['pos']['x'],
-                                        "y": brokenIm['pos']['y'],
+                                        "x": brokenIm["pos"]["x"],
+                                        "y": brokenIm["pos"]["y"],
                                         "width": 16,
                                         "height": 16,
                                         "href": None,
-                                        "icon_path": str(brokenOutpath) if brokenOutpath else None,
+                                        "icon_path": (
+                                            str(brokenOutpath)
+                                            if brokenOutpath
+                                            else None
+                                        ),
                                     }
                                 )
                                 logger.info(f"Found image in element: {src[:10]}...")
@@ -178,12 +203,12 @@ def dom_read(playwright, url: str, no_break: bool = False) -> tuple[list[FinderF
             int((item["y"] + item["height"] / 2) * 2),
         )
         ff = FinderFile(
-                title=text_value,
-                position=position,
-                href=item["href"],
-                icon_path=item["icon_path"] if "icon_path" in item else None,
-                is_link=item["href"] is not None,
-            )
+            title=text_value,
+            position=position,
+            href=item["href"],
+            icon_path=item["icon_path"] if "icon_path" in item else None,
+            is_link=item["href"] is not None,
+        )
         bboxes[ff] = (item["x"], item["y"], item["width"], item["height"])
         ret.append(ff)
     return (ret, bboxes, page_title)
