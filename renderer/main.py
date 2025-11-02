@@ -27,19 +27,19 @@ def main():
         from renderer.plotter.plotter import plotter_render
 
         items = plotter_render()
-        finder_render("Cam Hack 2025 - Plotter", items)
+        finder_render("Cam Hack 2025 - Plotter", items, icon_size=16)
         return
 
     if args.text:
 
         with sync_playwright() as playwright:
             coords, _, title = dom_read(playwright, args.url)
-        finder_render(title, coords)
+        finder_render(title, coords, icon_size=16, text_mode=True)
         return
 
     converter = URLImageConverter(args.url, icon_limit=210)
     tokens, title = converter.get_image_display(), converter.title
-    finder_render(title, tokens)
+    finder_render(title, tokens, icon_size=512)
 
 
 if __name__ == "__main__":

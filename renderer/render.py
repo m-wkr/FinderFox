@@ -40,15 +40,21 @@ class FinderFile:
         self.icon_path: str | None = icon_path
 
 
-def finder_render(site_name="Test Site", files: list[FinderFile] = []):
+def finder_render(
+    site_name="Test Site", files: list[FinderFile] = [], icon_size=16, text_mode=False
+):
     word_use_count = {}
 
     files.sort(key=lambda finder_file: finder_file.position[1])
-    
+
     if len(files) > 200:
         y_threshold = files[199].position[1]
-        files = [finder_file for finder_file in files if finder_file.position[1] <= y_threshold]
-    
+        files = [
+            finder_file
+            for finder_file in files
+            if finder_file.position[1] <= y_threshold
+        ]
+
     coord_min, coord_max = 0, 10000
     valid_files = []
 
@@ -70,7 +76,13 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
 
         for file in files:
 
-            file.title = file.title.replace("/", "-").replace("\0", "").replace(".", "․").strip().replace("[Image]", "\u200B")
+            file.title = (
+                file.title.replace("/", "-")
+                .replace("\0", "")
+                .replace(".", "․")
+                .strip()
+                .replace("[Image]", "\u200b")
+            )
 
             if file.title == "":
                 continue
@@ -81,16 +93,18 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
                 )
                 file.title = file.title[:20]
 
-            word_use_count[file.title.lower()] = word_use_count.get(file.title.lower(), 0) + 1
+            word_use_count[file.title.lower()] = (
+                word_use_count.get(file.title.lower(), 0) + 1
+            )
 
             if word_use_count[file.title.lower()] > 1:
-                file.title += "\u200B" * (word_use_count[file.title.lower()] - 1)
+                file.title += "\u200b" * (word_use_count[file.title.lower()] - 1)
 
             if file.is_link and file.href:
                 logger.info("Creating symlink for %s to %s", file.title, file.href)
                 file.title = underline(file.title)
                 file_path = os.path.join(tmpdirname, site_name, file.title)
-                writeBashContents.createBashFile(file_path,file.href)
+                writeBashContents.createBashFile(file_path, file.href, text_mode)
             else:
                 if file.tag == "h1":
                     file.title = bold(file.title)
@@ -105,7 +119,7 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
                     target=set_icon_process, args=(file_path, file.icon_path)
                 )
                 threads.append(t)
-            
+
             for t in threads:
                 t.start()
 
@@ -139,7 +153,7 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
                 "scrollPositionX": 0,
                 "arrangeBy": "none",
                 "labelOnBottom": False,
-                "iconSize": 512,
+                "iconSize": icon_size,
                 "textSize": 16,
                 "showIconPreview": False,
             }
