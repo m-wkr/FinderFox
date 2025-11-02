@@ -149,7 +149,8 @@ class URLImageConverter:
     
     def get_link_display(self) -> list[FinderFile]:
         positions = self.__link_tiling()
-        return self.__set_image_display(positions)
+        ff = self.__set_image_display(positions)
+        return list(filter(lambda x: x.position[0] > 1280 or x.position[1] > 560, ff))
     
     def get_cover_display(self) -> list[FinderFile]:
         positions = self.__link_cover_tiling()
