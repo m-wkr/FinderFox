@@ -1,4 +1,4 @@
-from renderer.render import FinderFile
+from render import FinderFile
 
 import logging
 
