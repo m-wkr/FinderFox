@@ -146,6 +146,7 @@ def dom_read(
                         logger.debug("Failed to save image: %s", image_error)
                     if box:
                         if no_break:
+
                             all_text_data.append(
                                 {
                                     "text": "[Image]",
@@ -161,18 +162,10 @@ def dom_read(
                             )
                             logger.info(f"Found image in element: {src[:10]}...")
                         else:
-                            brokenIms = imageBreak(
-                                output_path,
-                                {"x": 16, "y": 16},
-                                {"x": box["x"], "y": box["y"]},
-                            )
+                            brokenIms=imageBreak(output_path,{'x':box['width'],'y':box['height']},{'x':16,'y':16},{'x':box['x'],'y':box['y']})
                             for brokenIm in brokenIms:
-                                brokenOutpath = (
-                                    str(image_dir / "brimage")
-                                    + str(time.time())
-                                    + ".png"
-                                )
-                                imageio.v2.imwrite(brokenOutpath, brokenIm["im"])
+                                brokenOutpath=image_dir / "brimage"+str(brokenIm['pos']['x'])+'-'+str(brokenIm['pos']['y'])+".png"
+                                imageio.v2.imwrite(brokenOutpath,brokenIm['im'])
                                 all_text_data.append(
                                     {
                                         "text": "[Image]",
