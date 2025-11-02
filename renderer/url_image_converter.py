@@ -1,4 +1,3 @@
-import os
 import sys
 import math
 from pathlib import Path
@@ -68,32 +67,53 @@ class URLImageConverter:
         self.__ref_bboxes = {k: v for k, v in self.__ref_bboxes.items() if k in tokens}
         return tokens
     
-    def __tiling(self) -> list[tuple[int, int]]:
+    def __linkless_tiling(self) -> list[tuple[int, int]]:
         ix, iy = self.__icon_size
         vx, vy = self.__img.size
         positions = [(ix*x, iy*y) for x in range(math.ceil(vx/ix)) for y in range(math.ceil(vy//iy))]
-        
+        return positions
+    
+    def __link_tiling(self) -> list[tuple[int, int]]:
+        positions = []
         for (x,y,w,h) in self.__ref_bboxes.values():
             x = int(x)
             y = int(y)
             w = int(w)
             h = int(h)
             positions.append((x,y))
-            positions.append((x+w,y))
-            positions.append((x,y+h)) 
         return positions
     
-    def get_image_display(self) -> list[FinderFile]:
+    def __link_cover_tiling(self) -> list[tuple[int, int]]:
+        positions = []
+        for (x,y,w,h) in self.__ref_bboxes.values():
+            x = int(x)
+            y = int(y)
+            w = int(w)
+            h = int(h)
+            positions.append((x+w,y))
+            positions.append((x,y+h))
+        return positions
+    
+    def __get_navigation_buttons(self, position:list[tuple[int, int]] = [
+        (0,0),
+        (100,100),
+        (200,200),
+        (300,300),
+        ]):
+        #current
+        return [
+            FinderFile(title="[Search]", position=position[0], icon_path="url_icon/search.png"),
+            FinderFile(title="[Back]", position=position[1], icon_path="url_icon/back.png"),
+            FinderFile(title="[Forward]", position=position[2], icon_path="url_icon/forward.png"),
+            FinderFile(title="[History]", position=position[3], icon_path="url_icon/history.png")
+        ]
+        
+    def __set_image_display(self, positions:list[tuple[int, int]]):
         bbpos_to_ref = {(int(bbox[0]), int(bbox[1])): ref for ref, bbox in self.__ref_bboxes.items()}
-        positions = self.__tiling()
         result = []
         ix, iy = self.__icon_size
         for x, y in positions:
             icon_path = f"renderer/url_icon/{self.__icon_limit}.png"
-            if not os.path.exists("renderer"):
-                os.mkdir("renderer")
-            if not os.path.exists("renderer/url_icon"):
-                os.mkdir("renderer/url_icon")
             self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
             
             if ref := bbpos_to_ref.get((x,y)):
@@ -115,6 +135,19 @@ class URLImageConverter:
             if 0 >= self.__icon_limit:
                 return result
         return result
+            
+    def get_image_display(self) -> list[FinderFile]:
+        positions = self.__linkless_tiling()
+        return self.__set_image_display(positions)
+
+    def get_link_display(self) -> list[FinderFile]:
+        positions = self.__link_tiling()
+        #positions.extend(self.__get_navigation_buttons())
+        return self.__set_image_display(positions)
+    
+    def get_cover_display(self) -> list[FinderFile]:
+        positions = self.__link_cover_tiling()
+        return self.__set_image_display(positions)
     
     
     
