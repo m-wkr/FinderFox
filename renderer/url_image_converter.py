@@ -72,10 +72,10 @@ class URLImageConverter:
     def __link_tiling(self) -> list[tuple[int, int]]:
         positions = []
         for (x,y,w,h) in self.__ref_bboxes.values():
-            x = int(x / 4) * 4
+            x = int(x / 10) * 10
             y = int(y / 4) * 4
-            w = int(w)
-            h = int(h)
+            w = int(w / 4) * 4
+            h = int(h / 4) * 4
             positions.append((x,y))
         return positions
     
@@ -84,23 +84,12 @@ class URLImageConverter:
         for (x,y,w,h) in self.__ref_bboxes.values():
             x = int(x / 4) * 4
             y = int(y / 4) * 4
-            w = int(w)
-            h = int(h)
+            w = int(w / 4) * 4
+            h = int(h / 4) * 4
             positions.append((x+w,y))
             positions.append((x,y+h))
         return positions
     
-    """def __link_with_cover_tiling(self) -> list[tuple[int, int]]:
-        positions = []
-        for (x,y,w,h) in self.__ref_bboxes.values():
-            x = int(x)
-            y = int(y)
-            w = int(w)
-            h = int(h)
-            positions.append((x,y))
-            positions.append((x+w,y))
-            positions.append((x,y+h))
-        return positions"""
     
     def __get_navigation_buttons(self):
         #ICON BACK 64, 64 Top Left
