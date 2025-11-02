@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def dom_read(playwright, url: str) -> tuple[list[FinderFile], str]:
+def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, tuple[int,int,int,int]], str]:
     ret = []
     browser = playwright.chromium.launch(headless=True)
     page = browser.new_page(viewport={"width": 1200, "height": 600})
@@ -69,6 +69,26 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], str]:
                     for idx, word in enumerate(words):
                         row = idx // cols
                         col = idx % cols
+                        resolved_href = None
+                        if href:
+                            try:
+                                resolved_href = element.evaluate(
+                                    """(node) => {
+                                        if (node.href) return node.href;
+                                        const attr = node.getAttribute('href');
+                                        if (!attr) return null;
+                                        try {
+                                            return new URL(attr, window.location.href).toString();
+                                        } catch (err) {
+                                            return attr;
+                                        }
+                                    }"""
+                                )
+                            except Exception:
+                                resolved_href = href
+                            if not resolved_href:
+                                resolved_href = href
+
                         all_text_data.append(
                             {
                                 "text": word,
@@ -76,12 +96,13 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], str]:
                                 "y": box["y"] + row * cell_height,
                                 "width": cell_width,
                                 "height": cell_height,
-                                "href": urlparse(href) if href else None,
+                                "href": resolved_href,
                             }
                         )
             elif element.evaluate("el => el.tagName.toLowerCase() === 'img'"):
                 # Handle images
                 src = element.get_attribute("src")
+                output_path = None
                 if src:
                     box = element.bounding_box()
                     image_dir = Path.cwd() / "images"
@@ -135,20 +156,20 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], str]:
             pass
 
     browser.close()
-
+    bboxes = {}
     for item in all_text_data:
         text_value = item["text"]
         position = (
             int((item["x"] + item["width"] / 2)),
             int((item["y"] + item["height"] / 2) * 2),
         )
-        ret.append(
-            FinderFile(
+        ff = FinderFile(
                 title=text_value,
                 position=position,
                 href=item["href"],
                 icon_path=item["icon_path"] if "icon_path" in item else None,
                 is_link=item["href"] is not None,
             )
-        )
-    return (ret, page_title)
+        bboxes[ff] = (item["x"], item["y"], item["width"], item["height"])
+        ret.append(ff)
+    return (ret, bboxes, page_title)
