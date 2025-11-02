@@ -1,5 +1,7 @@
 from render import FinderFile
-
+from imageDecomposition import imageBreak
+import time
+import imageio
 import logging
 from pathlib import Path
 from urllib.parse import urlparse
@@ -111,18 +113,22 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], str]:
                     except Exception as image_error:
                         logger.debug("Failed to save image: %s", image_error)
                     if box:
-                        all_text_data.append(
-                            {
-                                "text": "[Image]",
-                                "x": box["x"],
-                                "y": box["y"],
-                                "width": box["width"],
-                                "height": box["height"],
-                                "href": None,
-                                "icon_path": str(output_path) if output_path else None,
-                            }
-                        )
-                        logger.info(f"Found image in element: {src[:10]}...")
+                        brokenIms=imageBreak(output_path,{'x':16,'y':16},{'x':box['x'],'y':box['y']})
+                        for brokenIm in brokenIms:
+                            brokenOutpath=image_dir / "brimage"+str(time.time())+".png"
+                            imageio.imwrite(brokenOutpath,brokenIm['im'])
+                            all_text_data.append(
+                                {
+                                    "text": "[Image]",
+                                    "x": brokenIm['pos']['x'],
+                                    "y": brokenIm['pos']['y'],
+                                    "width": 16,
+                                    "height": 16,
+                                    "href": None,
+                                    "icon_path": str(brokenOutpath) if brokenOutpath else None,
+                                }
+                            )
+                            logger.info(f"Found image in element: {src[:10]}...")
 
         except Exception as e:
             # Ignore errors from elements that disappeared
