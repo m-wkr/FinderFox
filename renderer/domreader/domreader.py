@@ -1,5 +1,5 @@
 from render import FinderFile
-from imageDecomposition import imageBreak
+from domreader.imageDecomposition import imageBreak
 import time
 import imageio
 import logging
