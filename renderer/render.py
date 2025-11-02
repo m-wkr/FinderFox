@@ -43,6 +43,7 @@ class FinderFile:
 def finder_render(
     site_name="Test Site", files: list[FinderFile] = [], icon_size=16, text_mode=False
 ):
+    site_name = site_name.replace("/", "-").replace("\0", "").replace(".", "․")
     word_use_count = {}
 
     files.sort(key=lambda finder_file: finder_file.position[1])
