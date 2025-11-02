@@ -70,7 +70,7 @@ def finder_render(site_name="Test Site", files: list[FinderFile] = []):
 
         for file in files:
 
-            file.title = file.title.replace("/", "-").replace("\0", "").replace(".", "․").strip()
+            file.title = file.title.replace("/", "-").replace("\0", "").replace(".", "․").strip().replace("[Image]", "\u200B")
 
             if file.title == "":
                 continue

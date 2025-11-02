@@ -1,6 +1,10 @@
 from render import FinderFile
 
 import logging
+from pathlib import Path
+from urllib.parse import urlparse
+import base64
+import hashlib
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -63,6 +67,26 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                     for idx, word in enumerate(words):
                         row = idx // cols
                         col = idx % cols
+                        resolved_href = None
+                        if href:
+                            try:
+                                resolved_href = element.evaluate(
+                                    """(node) => {
+                                        if (node.href) return node.href;
+                                        const attr = node.getAttribute('href');
+                                        if (!attr) return null;
+                                        try {
+                                            return new URL(attr, window.location.href).toString();
+                                        } catch (err) {
+                                            return attr;
+                                        }
+                                    }"""
+                                )
+                            except Exception:
+                                resolved_href = href
+                            if not resolved_href:
+                                resolved_href = href
+
                         all_text_data.append(
                             {
                                 "text": word,
@@ -70,9 +94,56 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                                 "y": box["y"] + row * cell_height,
                                 "width": cell_width,
                                 "height": cell_height,
-                                "href": href if href else None,
+                                "href": resolved_href,
                             }
                         )
+            elif element.evaluate("el => el.tagName.toLowerCase() === 'img'"):
+                # Handle images
+                src = element.get_attribute("src")
+                if src:
+                    box = element.bounding_box()
+                    image_dir = Path.cwd() / "images"
+                    image_dir.mkdir(parents=True, exist_ok=True)
+                    try:
+                        file_bytes = None
+                        file_suffix = ".bin"
+                        parsed_src = urlparse(src)
+                        if parsed_src.scheme == "data":
+                            header, b64_data = src.split(",", 1)
+                            file_bytes = base64.b64decode(b64_data)
+                            mime = header.split(";")[0]
+                            if "/" in mime:
+                                file_suffix = f".{mime.split('/', 1)[1]}"
+                        else:
+                            resolved_src = element.evaluate("node => node.src") or src
+                            response = page.context.request.get(resolved_src, timeout=5000)
+                            if response.ok:
+                                file_bytes = response.body()
+                                path_suffix = Path(urlparse(resolved_src).path).suffix
+                                if path_suffix:
+                                    file_suffix = path_suffix
+                        if file_bytes:
+                            filename = f"{hashlib.sha256(file_bytes).hexdigest()[:16]}{file_suffix}"
+                            output_path = image_dir / filename
+                            if not output_path.exists():
+                                output_path.write_bytes(file_bytes)
+                            logger.info("Saved image to %s", output_path)
+                    except Exception as image_error:
+                        logger.debug("Failed to save image: %s", image_error)
+                    if box:
+                        all_text_data.append(
+                            {
+                                "text": "[Image]",
+                                "x": box["x"],
+                                "y": box["y"],
+                                "width": box["width"],
+                                "height": box["height"],
+                                "href": None,
+                                "icon_path": str(output_path) if output_path else None,
+                            }
+                        )
+                        logger.info(f"Found image in element: {src[:10]}...")
+
         except Exception as e:
             # Ignore errors from elements that disappeared
             pass
@@ -89,6 +160,7 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                 title=text_value,
                 position=position,
                 href=item["href"],
+                icon_path=item["icon_path"] if "icon_path" in item else None,
                 is_link=item["href"] is not None,
             )
         bboxes[ff] = (item["x"], item["y"], item["width"], item["height"])
