@@ -154,9 +154,8 @@ class URLImageConverter:
         for f in ff:
             x, y = f.position
             if x in seen_x or y in seen_y:
-                continue
-            seen_x.append(x)
-            seen_y.append(y)
+                f.position[0] += 1
+                f.position[1] += 1
             result.append(f)
         return result
     
