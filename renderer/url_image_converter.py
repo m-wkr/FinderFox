@@ -1,3 +1,4 @@
+import os
 import sys
 import math
 from pathlib import Path
@@ -113,6 +114,8 @@ class URLImageConverter:
         bbpos_to_ref = {(int(bbox[0]), int(bbox[1])): ref for ref, bbox in self.__ref_bboxes.items()}
         result = []
         ix, iy = self.__icon_size
+        if not os.path.exists(Path(__file__).parent / "url_icon"):
+            os.mkdir(Path(__file__).parent / "url_icon")
         for x, y in positions:
             icon_path = Path(__file__).parent / "url_icon" / f"{self.__icon_limit}.png"
             self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
