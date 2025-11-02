@@ -72,8 +72,8 @@ class URLImageConverter:
     def __link_tiling(self) -> list[tuple[int, int]]:
         positions = []
         for (x,y,w,h) in self.__ref_bboxes.values():
-            x = int(x)
-            y = int(y)
+            x = int(x / 4) * 4
+            y = int(y / 4) * 4
             w = int(w)
             h = int(h)
             positions.append((x,y))
@@ -82,8 +82,8 @@ class URLImageConverter:
     def __link_cover_tiling(self) -> list[tuple[int, int]]:
         positions = []
         for (x,y,w,h) in self.__ref_bboxes.values():
-            x = int(x)
-            y = int(y)
+            x = int(x / 4) * 4
+            y = int(y / 4) * 4
             w = int(w)
             h = int(h)
             positions.append((x+w,y))
@@ -172,5 +172,5 @@ if __name__ == "__main__":
     # You can input an different icon_size (int, int) default is 512, 512
     
     converter = URLImageConverter("https://camhack.org/")
-    tokens, title = converter.get_image_display(), converter.title
+    tokens, _, title = converter.get_image_display(), converter.get_link_display(), converter.title
     pass

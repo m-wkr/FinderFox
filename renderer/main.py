@@ -5,6 +5,9 @@ from domreader.domreader import dom_read
 from render import finder_render
 from url_image_converter import URLImageConverter
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def main():
     parser = ArgumentParser(description="Turns Finder to a web browser.")
@@ -37,8 +40,15 @@ def main():
         finder_render(title, coords)
         return
       
-    converter = URLImageConverter(args.url, icon_limit=230)
-    tokens, title = converter.get_image_display() + converter.get_link_display(), converter.title #+ converter.get_cover_display(), converter.title
+    converter = URLImageConverter(args.url, icon_limit=300)
+    image_tokens = converter.get_image_display()
+    link_tokens = converter.get_link_display()
+    # cover_tokens = converter.get_cover_display()
+    cover_tokens = []
+
+    tokens, title = image_tokens + link_tokens + cover_tokens, converter.title
+    logger.info(f"Rendering {len(image_tokens)} image tokens and {len(link_tokens)} link tokens and {len(cover_tokens)} cover tokens.")
+
     finder_render(title, tokens, icon_size=512)
 
 if __name__ == "__main__":
