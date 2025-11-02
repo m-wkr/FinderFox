@@ -22,12 +22,14 @@ class URLImageConverter:
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
         }
-        self.__state: State = State()
+        state_path = Path(__file__).parent / "state.json"
+        self.__state = State(str(state_path))
         self.__img: Image.Image = self.__get_img(url)
         ### get_ref and get_natigation_buttons has the side effect of populating the ref_bboxes dict
         self.__ref_bboxes: dict[FinderFile, tuple[int,int,int,int]] = {}
         self.__get_navigation_buttons()
         self.__ref: list[FinderFile] = self.__get_ref(url)
+        self.__links: int = len(self.__ref)
     
     def set_state(self, url):
         self.__state = State(url)
@@ -88,6 +90,18 @@ class URLImageConverter:
             positions.append((x,y+h))
         return positions
     
+    """def __link_with_cover_tiling(self) -> list[tuple[int, int]]:
+        positions = []
+        for (x,y,w,h) in self.__ref_bboxes.values():
+            x = int(x)
+            y = int(y)
+            w = int(w)
+            h = int(h)
+            positions.append((x,y))
+            positions.append((x+w,y))
+            positions.append((x,y+h))
+        return positions"""
+    
     def __get_navigation_buttons(self):
         #ICON BACK 64, 64 Top Left
         #ICON BACK 64, 64 Top Right
@@ -106,12 +120,12 @@ class URLImageConverter:
         for f in ff:
             self.__ref_bboxes[f] = (f.position[0], f.position[1], 64, 64)
         
-    def __set_image_display(self, positions:list[tuple[int, int]]):
+    def __set_image_display(self, positions:list[tuple[int, int]], limit:int=0):
         bbpos_to_ref = {(int(bbox[0]), int(bbox[1])): ref for ref, bbox in self.__ref_bboxes.items()}
         result = []
         ix, iy = self.__icon_size
         for x, y in positions:
-            icon_path = f"renderer/url_icon/{self.__icon_limit}.png"
+            icon_path = Path(__file__).parent / "url_icon" / f"{self.__icon_limit}.png"
             self.__img.crop((x, y, x+ix, y+iy)).save(icon_path)
             
             if ref := bbpos_to_ref.get((x,y)):
@@ -126,21 +140,24 @@ class URLImageConverter:
                 position=(x,y),
                 is_link=is_link,
                 href=href,
-                icon_path=icon_path
+                icon_path=str(icon_path)
             ))
             
             self.__icon_limit -= 1
-            if 0 >= self.__icon_limit:
+            if limit >= self.__icon_limit:
                 return result
         return result
             
     def get_image_display(self) -> list[FinderFile]:
         positions = self.__linkless_tiling()
-        return self.__set_image_display(positions)
-
+        return self.__set_image_display(positions, limit=self.__links*3)
+    
+    """def get_link_display_with_cover(self) -> list[FinderFile]:
+        positions = self.__link_with_cover_tiling()
+        return self.__set_image_display(positions)"""
+    
     def get_link_display(self) -> list[FinderFile]:
         positions = self.__link_tiling()
-        #positions.extend(self.__get_navigation_buttons())
         return self.__set_image_display(positions)
     
     def get_cover_display(self) -> list[FinderFile]:

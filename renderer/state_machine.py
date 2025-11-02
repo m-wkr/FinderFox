@@ -12,10 +12,6 @@ class State:
                 "history" : self.history + [self.current],
             }
             state_file.write(json.dumps(state))
-        """
-        NEED TO INTEGRATE CORRECTLY
-        - Should have a left and history of recently visited websites and be able to hyperlink the left and right with the latest
-        """
 
 if __name__ == "__main__":
     State()
