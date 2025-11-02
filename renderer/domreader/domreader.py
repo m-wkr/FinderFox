@@ -134,7 +134,7 @@ def dom_read(playwright, url: str) -> tuple[list[FinderFile], dict[FinderFile, t
                     except Exception as image_error:
                         logger.debug("Failed to save image: %s", image_error)
                     if box:
-                        brokenIms=imageBreak(output_path,{'x':16,'y':16},{'x':box['x'],'y':box['y']})
+                        brokenIms=imageBreak(output_path,{'x':box['width'],'y':box['height']},{'x':16,'y':16},{'x':box['x'],'y':box['y']})
                         for brokenIm in brokenIms:
                             brokenOutpath=image_dir / "brimage"+str(time.time())+".png"
                             imageio.v2.imwrite(brokenOutpath,brokenIm['im'])
