@@ -1,0 +1,10 @@
+#!/bin/bash
+
+FILE=$(basename "$0")
+
+argv=()
+for i in $FILE; do 
+    argv+=($i)
+done
+
+python3 ./renderer/main.py "${argv[@]}"
