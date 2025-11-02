@@ -22,14 +22,12 @@ class URLImageConverter:
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
         }
-        state_path = Path(__file__).parent / "state.json"
-        self.__state = State(str(state_path))
         self.__img: Image.Image = self.__get_img(url)
         ### get_ref and get_natigation_buttons has the side effect of populating the ref_bboxes dict
         self.__ref_bboxes: dict[FinderFile, tuple[int,int,int,int]] = {}
         self.__get_navigation_buttons()
         self.__ref: list[FinderFile] = self.__get_ref(url)
-        self.__links: int = len(self.__ref) + 10
+        self.__links: int = len(self.__ref) + 100
     
     def set_state(self, url):
         self.__state = State(url)
