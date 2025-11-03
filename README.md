@@ -44,7 +44,7 @@ FinderFox operates by creating a temporary folder within the file system, asking
 
 FinderFox is capable of rendering web pages in two modes: graphical and text-based.
 
-In graphical mode, FinderFox uses the [Playwright](https://playwright.dev/python/) library to render the web page in a headless Chromium browser, taking a screenshot of the rendered page. The screenshot is then split into a grid of icons, which are saved as individual files in the temporary folder. The .DS_Store file is then manipulated to position these icons correctly within Finder (see next section).
+In graphical mode, FinderFox uses the [Playwright](https://playwright.dev/python/) library to render the web page in a headless Chromium browser, taking a screenshot of the rendered page. The screenshot is then split into a grid of icons, which are saved as individual files in the temporary folder. The .DS_Store file is then manipulated to position these icons correctly within Finder (see [Manipulating .DS_Store and Icons](#manipulating-ds_store-and-icons)).
 
 In text-based mode, Playwright is still used to fetch the web page, but instead of rendering it graphically, the DOM is extracted and positioned using JavaScript executed within the page context. Each word is saved as a separate file in the temporary folder, and the .DS_Store file is manipulated to position these text files correctly within Finder.
 
