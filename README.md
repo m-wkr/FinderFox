@@ -60,7 +60,7 @@ Links function as Bash shell scripts that calls `main.py` with the target URL wh
 
 The links are underlined using U+035F to simulate the appearance of underlined text, as Finder does not support text formatting in file names. Bold texts are converted to mathematical bold sans-serif Unicode characters.
 
-### Search and URL Sanitation
+### Search and URL Sanitisation
 
 FinderFox uses the [DuckDuckGo](https://duckduckgo.com/) search engine to handle search queries. There is a URL sanitation step that checks and tries to convert user input into valid URLs. If the input is not a valid URL, it is treated as a search query.
 
